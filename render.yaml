@@ -1,10 +1,7 @@
 services:
   - type: web
     name: twig-ticket-app
-    env: php
-    buildCommand: composer install --no-dev --optimize-autoloader
-    startCommand: php -S 0.0.0.0:$PORT
+    runtime: docker
+    plan: free
     healthCheckPath: /
-    envVars:
-      - key: PHP_VERSION
-        value: 8.2
+    autoDeploy: true

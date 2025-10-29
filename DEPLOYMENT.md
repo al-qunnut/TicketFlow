@@ -51,15 +51,9 @@ Fill in the following settings:
 - **Root Directory**: Leave blank (unless your app is in a subdirectory)
 
 **Build & Deploy Settings:**
-- **Runtime**: Select **"PHP"**
-- **Build Command**: 
-  ```
-  composer install --no-dev --optimize-autoloader
-  ```
-- **Start Command**: 
-  ```
-  php -S 0.0.0.0:$PORT
-  ```
+- **Runtime**: Select **"Docker"** (Render will auto-detect the Dockerfile)
+- **Build Command**: Leave blank (Docker handles this)
+- **Start Command**: Leave blank (uses CMD from Dockerfile)
 
 **Instance Type:**
 - Select **"Free"** (this gives you 750 hours/month free)
