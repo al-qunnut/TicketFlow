@@ -1,0 +1,17 @@
+<nav class="navbar">
+    <div class="container">
+        <a href="/" class="navbar-brand">
+            🎫 TicketFlow
+        </a>
+        <ul class="navbar-nav">
+            {% if session.isAuthenticated %}
+                <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+                <li><a href="/tickets" class="nav-link">Tickets</a></li>
+                <li><a href="/logout" class="nav-link">Logout</a></li>
+            {% else %}
+                <li><a href="/login" class="nav-link">Login</a></li>
+                <li><a href="/signup" class="btn btn-primary btn-sm">Get Started</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>

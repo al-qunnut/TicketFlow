@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}TicketFlow - Modern Ticket Management System{% endblock %}">
+    <title>{% block title %}TicketFlow{% endblock %}</title>
+    <link rel="stylesheet" href="/public/css/styles.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% include 'partials/navbar.twig' %}
+    
+    {% if session.flash %}
+    <div class="toast toast-{{ session.flash.type }}" id="toast">
+        {{ session.flash.message }}
+    </div>
+    {% endif %}
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    {% include 'partials/footer.twig' %}
+    
+    <script src="/public/js/main.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

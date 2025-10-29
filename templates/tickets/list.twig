@@ -1,0 +1,142 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Tickets - TicketFlow{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">Ticket Management</h1>
+                <p style="color: var(--text-light);">View and manage all your tickets</p>
+            </div>
+            <div>
+                <a href="/tickets/create" class="btn btn-primary">+ Create Ticket</a>
+                <a href="/dashboard" class="btn btn-outline">Back to Dashboard</a>
+            </div>
+        </div>
+        
+        {% if tickets|length > 0 %}
+        <div class="ticket-list">
+            {% for ticket in tickets %}
+            <div class="ticket-item">
+                <div class="ticket-content">
+                    <h3 class="ticket-title">{{ ticket.title }}</h3>
+                    {% if ticket.description %}
+                    <p class="ticket-description">{{ ticket.description }}</p>
+                    {% endif %}
+                    <div class="ticket-meta">
+                        <span class="status-badge status-{{ ticket.status }}">
+                            {{ ticket.status|replace({'_': ' '}) }}
+                        </span>
+                        <span class="priority-badge priority-{{ ticket.priority }}">
+                            {{ ticket.priority }} priority
+                        </span>
+                        <span>Created: {{ ticket.created_at }}</span>
+                        {% if ticket.updated_at != ticket.created_at %}
+                        <span>Updated: {{ ticket.updated_at }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="ticket-actions">
+                    <a href="/tickets/{{ ticket.id }}/edit" class="btn btn-outline btn-sm">Edit</a>
+                    <button 
+                        class="btn btn-danger btn-sm" 
+                        onclick="deleteTicket('{{ ticket.id }}', '{{ ticket.title }}')"
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <h3>No tickets found</h3>
+            <p>You haven't created any tickets yet. Start by creating your first one!</p>
+            <a href="/tickets/create" class="btn btn-primary">Create Your First Ticket</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal-overlay" style="display: none;">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Confirm Delete</h2>
+            <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+        </div>
+        <p>Are you sure you want to delete the ticket "<strong id="deleteTicketTitle"></strong>"?</p>
+        <p style="color: var(--danger-color); margin-top: 1rem;">This action cannot be undone.</p>
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button class="btn btn-danger" onclick="confirmDelete()">
+                <span id="delete-text">Delete Ticket</span>
+                <span id="delete-loading" class="loading" style="display: none;"></span>
+            </button>
+            <button class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let ticketToDelete = null;
+
+function deleteTicket(id, title) {
+    ticketToDelete = id;
+    document.getElementById('deleteTicketTitle').textContent = title;
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    ticketToDelete = null;
+}
+
+async function confirmDelete() {
+    if (!ticketToDelete) return;
+    
+    document.getElementById('delete-text').style.display = 'none';
+    document.getElementById('delete-loading').style.display = 'inline-block';
+    
+    try {
+        const response = await fetch(`/tickets/${ticketToDelete}/delete`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('Ticket deleted successfully', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showToast('Failed to delete ticket', 'error');
+        }
+    } catch (error) {
+        showToast('An error occurred. Please try again.', 'error');
+    } finally {
+        document.getElementById('delete-text').style.display = 'inline';
+        document.getElementById('delete-loading').style.display = 'none';
+    }
+}
+
+// Close modal on escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeDeleteModal();
+    }
+});
+
+// Close modal on overlay click
+document.getElementById('deleteModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'deleteModal') {
+        closeDeleteModal();
+    }
+});
+</script>
+{% endblock %}

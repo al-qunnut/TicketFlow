@@ -1,0 +1,78 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Dashboard - TicketFlow{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">Welcome back, {{ session.user.name }}!</h1>
+                <p style="color: var(--text-light);">Here's an overview of your ticket system</p>
+            </div>
+            <div>
+                <a href="/tickets/create" class="btn btn-primary">+ New Ticket</a>
+                <a href="/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total }}</div>
+                <div class="stat-label">Total Tickets</div>
+            </div>
+            
+            <div class="stat-card stat-open">
+                <div class="stat-value" style="color: var(--status-open);">{{ stats.open }}</div>
+                <div class="stat-label">Open Tickets</div>
+            </div>
+            
+            <div class="stat-card stat-progress">
+                <div class="stat-value" style="color: var(--status-progress);">{{ stats.in_progress }}</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+            
+            <div class="stat-card stat-closed">
+                <div class="stat-value" style="color: var(--status-closed);">{{ stats.resolved }}</div>
+                <div class="stat-label">Resolved Tickets</div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card" style="margin-top: 2rem;">
+            <div class="card-header">
+                <h2 class="card-title">Quick Actions</h2>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <a href="/tickets" class="card" style="text-decoration: none; color: inherit; text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📋</div>
+                    <h3>View All Tickets</h3>
+                    <p style="color: var(--text-light); font-size: 0.875rem;">Manage and track your tickets</p>
+                </a>
+                
+                <a href="/tickets/create" class="card" style="text-decoration: none; color: inherit; text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">➕</div>
+                    <h3>Create New Ticket</h3>
+                    <p style="color: var(--text-light); font-size: 0.875rem;">Report a new issue or request</p>
+                </a>
+                
+                <a href="/tickets" class="card" style="text-decoration: none; color: inherit; text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📊</div>
+                    <h3>View Reports</h3>
+                    <p style="color: var(--text-light); font-size: 0.875rem;">Analyze ticket metrics</p>
+                </a>
+            </div>
+        </div>
+        
+        {% if stats.total == 0 %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🎫</div>
+            <h3>No tickets yet</h3>
+            <p>Get started by creating your first ticket</p>
+            <a href="/tickets/create" class="btn btn-primary">Create Your First Ticket</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

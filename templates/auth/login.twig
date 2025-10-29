@@ -1,0 +1,115 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Login - TicketFlow{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <h1>Welcome Back</h1>
+        
+        <form id="loginForm" method="POST" action="/login">
+            <div class="form-group">
+                <label for="email" class="form-label required">Email Address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="form-control" 
+                    placeholder="your@email.com"
+                    required
+                    autocomplete="email"
+                >
+                <span class="form-error" id="email-error"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label required">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="form-control" 
+                    placeholder="Enter your password"
+                    required
+                    autocomplete="current-password"
+                >
+                <span class="form-error" id="password-error"></span>
+            </div>
+            
+            <div id="form-errors" class="alert alert-error" style="display: none;"></div>
+            
+            <button type="submit" class="btn btn-primary btn-block">
+                <span id="submit-text">Sign In</span>
+                <span id="submit-loading" class="loading" style="display: none;"></span>
+            </button>
+        </form>
+        
+        <div class="auth-links">
+            <p>Don't have an account? <a href="/signup">Sign up here</a></p>
+        </div>
+        
+        <div style="margin-top: 2rem; padding: 1rem; background: var(--bg-light); border-radius: 8px; font-size: 0.875rem;">
+            <strong>Demo Accounts:</strong><br>
+            <code>admin@ticketapp.com</code> / <code>admin123</code><br>
+            <code>user@ticketapp.com</code> / <code>user123</code>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Clear previous errors
+    document.querySelectorAll('.form-error').forEach(el => el.textContent = '');
+    document.querySelectorAll('.form-control').forEach(el => el.classList.remove('error'));
+    document.getElementById('form-errors').style.display = 'none';
+    
+    // Show loading
+    document.getElementById('submit-text').style.display = 'none';
+    document.getElementById('submit-loading').style.display = 'inline-block';
+    
+    const formData = new FormData(e.target);
+    
+    try {
+        const response = await fetch('/login', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('Login successful! Redirecting...', 'success');
+            setTimeout(() => {
+                window.location.href = data.redirect || '/dashboard';
+            }, 1000);
+        } else {
+            // Show errors
+            if (data.errors) {
+                if (typeof data.errors === 'object' && !Array.isArray(data.errors)) {
+                    Object.keys(data.errors).forEach(key => {
+                        const errorEl = document.getElementById(key + '-error');
+                        const inputEl = document.getElementById(key);
+                        if (errorEl) errorEl.textContent = data.errors[key];
+                        if (inputEl) inputEl.classList.add('error');
+                    });
+                } else {
+                    const errorsDiv = document.getElementById('form-errors');
+                    errorsDiv.textContent = Array.isArray(data.errors) ? data.errors.join(', ') : data.errors;
+                    errorsDiv.style.display = 'block';
+                }
+            }
+            showToast('Login failed. Please check your credentials.', 'error');
+        }
+    } catch (error) {
+        showToast('An error occurred. Please try again.', 'error');
+    } finally {
+        document.getElementById('submit-text').style.display = 'inline';
+        document.getElementById('submit-loading').style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

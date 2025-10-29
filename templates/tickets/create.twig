@@ -1,0 +1,135 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Create Ticket - TicketFlow{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container-narrow">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Create New Ticket</h1>
+            <a href="/tickets" class="btn btn-outline">Back to Tickets</a>
+        </div>
+        
+        <div class="card">
+            <form id="createTicketForm" method="POST" action="/tickets/create">
+                <div class="form-group">
+                    <label for="title" class="form-label required">Ticket Title</label>
+                    <input 
+                        type="text" 
+                        id="title" 
+                        name="title" 
+                        class="form-control" 
+                        placeholder="Brief description of the issue"
+                        required
+                        minlength="3"
+                        maxlength="200"
+                    >
+                    <span class="form-error" id="title-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        class="form-control" 
+                        placeholder="Provide detailed information about the ticket..."
+                        rows="5"
+                        maxlength="1000"
+                    ></textarea>
+                    <span class="form-error" id="description-error"></span>
+                    <small style="color: var(--text-light);">Optional - Maximum 1000 characters</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="status" class="form-label required">Status</label>
+                    <select id="status" name="status" class="form-control form-select" required>
+                        <option value="open" selected>Open</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                    <span class="form-error" id="status-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="priority" class="form-label">Priority</label>
+                    <select id="priority" name="priority" class="form-control form-select">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                    <span class="form-error" id="priority-error"></span>
+                </div>
+                
+                <div id="form-errors" class="alert alert-error" style="display: none;"></div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">
+                        <span id="submit-text">Create Ticket</span>
+                        <span id="submit-loading" class="loading" style="display: none;"></span>
+                    </button>
+                    <a href="/tickets" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('createTicketForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Clear previous errors
+    document.querySelectorAll('.form-error').forEach(el => el.textContent = '');
+    document.querySelectorAll('.form-control').forEach(el => el.classList.remove('error'));
+    document.getElementById('form-errors').style.display = 'none';
+    
+    // Show loading
+    document.getElementById('submit-text').style.display = 'none';
+    document.getElementById('submit-loading').style.display = 'inline-block';
+    
+    const formData = new FormData(e.target);
+    
+    try {
+        const response = await fetch('/tickets/create', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('Ticket created successfully!', 'success');
+            setTimeout(() => {
+                window.location.href = data.redirect || '/tickets';
+            }, 1000);
+        } else {
+            // Show errors
+            if (data.errors) {
+                if (typeof data.errors === 'object' && !Array.isArray(data.errors)) {
+                    Object.keys(data.errors).forEach(key => {
+                        const errorEl = document.getElementById(key + '-error');
+                        const inputEl = document.getElementById(key);
+                        if (errorEl) errorEl.textContent = data.errors[key];
+                        if (inputEl) inputEl.classList.add('error');
+                    });
+                } else {
+                    const errorsDiv = document.getElementById('form-errors');
+                    errorsDiv.textContent = Array.isArray(data.errors) ? data.errors.join(', ') : data.errors;
+                    errorsDiv.style.display = 'block';
+                }
+            }
+            showToast('Failed to create ticket. Please check the form.', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('An error occurred. Please try again.', 'error');
+    } finally {
+        document.getElementById('submit-text').style.display = 'inline';
+        document.getElementById('submit-loading').style.display = 'none';
+    }
+});
+</script>
+{% endblock %}
