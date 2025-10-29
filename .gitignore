@@ -1,0 +1,24 @@
+# Vendor directory
+/vendor/
+
+# Composer lock file (optional - remove this line if you want to commit it)
+# composer.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+
+# Cache
+/cache/
+*.cache
